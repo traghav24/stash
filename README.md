@@ -1,6 +1,6 @@
 # Stash
 
-A self-organizing commonplace book, with a floating dog that you feed things to.
+Feed anything to the dog. It files what you save, plans what you have to do, and times you while you do it.
 
 - **Canvas**: everything you've saved, grouped into topic piles. Piles start folded so the board stays calm.
 - **Plans**: what you have to do, shown as time you can see (how much of the day is left, whether today fits, a "What now?" button).
