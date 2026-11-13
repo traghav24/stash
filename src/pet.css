@@ -1,0 +1,180 @@
+:root {
+  --ink: #2b2a33;
+  --paper: #fffaf1;
+  --accent: #84a2f8;
+}
+* { box-sizing: border-box; }
+.pet {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  font-family: "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  user-select: none;
+}
+/* What's measured to size the window. Padding leaves room for hops, tilts and shadows. */
+.petinner {
+  /* sized by its own content, never squeezed by the window's current size */
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: max-content;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 22px 12px 8px 14px;
+}
+/* Layers, each with its own motion so they never fight:
+   .dogwrap  = one-off fidgets and reactions
+   .flip     = which way the dog faces
+   .posepop  = a little pop whenever the pose changes
+   .dog      = the pose's own loop (breathing, bouncing, wagging) */
+.dogwrap {
+  cursor: grab;
+  filter: drop-shadow(0 4px 8px rgba(43, 42, 51, 0.18));
+  transform-origin: bottom center;
+  transition: transform 0.25s cubic-bezier(.3, 1.6, .5, 1);
+}
+.dogwrap:active { cursor: grabbing; }
+.pet.over .dogwrap { transform: scale(1.14); }
+.dogwrap.carried { transform: rotate(-8deg) translateY(-6px); filter: drop-shadow(0 14px 12px rgba(43, 42, 51, 0.22)); }
+.flip { transform: scaleX(var(--facing, 1)); transition: transform .2s; }
+.posepop { animation: pop .32s cubic-bezier(.3, 1.6, .5, 1); transform-origin: bottom center; }
+.dog { transform-origin: bottom center; }
+.dog svg { width: 100%; height: 100%; overflow: visible; display: block; }
+
+@keyframes pop { 0% { transform: scale(.86, .9) } 60% { transform: scale(1.05, 1.03) } 100% { transform: scale(1) } }
+
+/* each pose's own loop */
+.dog-lying, .dog-sleepy, .dog-half-asleep, .dog-peek-sleepy { animation: breathe 3.6s ease-in-out infinite; }
+.dog-peek-alert, .dog-peek-happy, .dog-peek-smile, .dog-peek-tongue, .dog-peek-tongue-wide { animation: bob 2.8s ease-in-out infinite; }
+.dog-holding { animation: wiggle 2.4s ease-in-out infinite; }
+.dog-thinking, .dog-sit-confused { animation: ponder 3.2s ease-in-out infinite; }
+.dog-peek-starry, .dog-glowing { animation: bounce .55s ease-in-out infinite; }
+.dog-peek-shy { animation: nuzzle 1.4s ease-in-out infinite; }
+.dog-peek-surprised { animation: shiver .18s linear infinite; }
+.walking .dog-running { animation: run .6s cubic-bezier(.45, 0, .55, 1) infinite; }
+
+@keyframes breathe { 50% { transform: scale(1.02, 1.045) } }
+@keyframes bob { 50% { transform: translateY(-2px) } }
+@keyframes wiggle { 0%, 100% { transform: rotate(0) } 25% { transform: rotate(-3deg) } 75% { transform: rotate(2deg) } }
+@keyframes ponder { 0%, 100% { transform: rotate(0) } 50% { transform: rotate(-4deg) } }
+@keyframes bounce { 0%, 100% { transform: translateY(0) scale(1, 1) } 45% { transform: translateY(-8px) scale(.97, 1.03) } 90% { transform: translateY(0) scale(1.04, .95) } }
+@keyframes nuzzle { 0%, 100% { transform: rotate(0) translateX(0) } 50% { transform: rotate(3deg) translateX(2px) } }
+@keyframes shiver { 0%, 100% { transform: translateX(0) } 50% { transform: translateX(1px) } }
+/* a run cycle: push off, fly with a forward lean, land with a squash */
+@keyframes run {
+  0%   { transform: translateY(0) rotate(0) scale(1.04, .95); }
+  25%  { transform: translateY(-9px) rotate(-5deg) scale(.98, 1.03); }
+  50%  { transform: translateY(-12px) rotate(-3deg) scale(1, 1); }
+  75%  { transform: translateY(-5px) rotate(2deg) scale(1, 1.01); }
+  100% { transform: translateY(0) rotate(0) scale(1.04, .95); }
+}
+.flip { position: relative; }
+/* dust trails behind (the drawing faces left, so behind is to the right; .flip mirrors it) */
+.dust { position: absolute; right: 2px; bottom: 4px; width: 40px; height: 20px; pointer-events: none; }
+.dust i { position: absolute; bottom: 0; right: 0; width: 9px; height: 9px; border-radius: 50%; background: #e8e0d2; border: 1.5px solid var(--ink); opacity: 0; animation: puff 1.2s ease-out infinite; }
+.dust i:nth-child(2) { animation-delay: .4s; width: 7px; height: 7px; }
+.dust i:nth-child(3) { animation-delay: .8s; width: 11px; height: 11px; }
+@keyframes puff {
+  0%   { transform: translate(0, 0) scale(.4); opacity: 0; }
+  20%  { opacity: .9; }
+  100% { transform: translate(26px, -10px) scale(1.2); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .dust { display: none; } }
+
+/* one-off fidgets */
+.fidget-hop { animation: hop .6s ease-out; }
+.fidget-tilt { animation: tilt 1s ease-in-out; }
+.fidget-look .flip { animation: look 1s ease-in-out; }
+.fidget-wiggle { animation: wag .9s ease-in-out; }
+.fidget-stretch { animation: stretch 1.1s ease-in-out; }
+.fidget-sniff { animation: sniff .9s ease-in-out; }
+.fidget-dream { animation: dream 1.1s ease-in-out; }
+.fidget-land { animation: land .45s ease-out; }
+@keyframes hop { 0% { transform: translateY(0) } 35% { transform: translateY(-18px) scale(.96, 1.05) } 70% { transform: translateY(0) scale(1.06, .93) } 100% { transform: none } }
+@keyframes tilt { 0%, 100% { transform: rotate(0) } 30%, 70% { transform: rotate(-9deg) } }
+@keyframes look { 0%, 100% { transform: scaleX(var(--facing, 1)) } 30%, 70% { transform: scaleX(calc(var(--facing, 1) * -1)) } }
+@keyframes wag { 0%, 100% { transform: rotate(0) } 20% { transform: rotate(4deg) } 40% { transform: rotate(-4deg) } 60% { transform: rotate(3deg) } 80% { transform: rotate(-2deg) } }
+@keyframes stretch { 0%, 100% { transform: scale(1) } 40% { transform: scale(1.12, .88) } 70% { transform: scale(.96, 1.05) } }
+@keyframes sniff { 0%, 100% { transform: translateX(0) } 20% { transform: translateX(-4px) } 40% { transform: translateX(-2px) } 60% { transform: translateX(-5px) } }
+@keyframes dream { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-2px) rotate(1deg) } }
+@keyframes land { 0% { transform: scale(1.08, .88) } 100% { transform: scale(1) } }
+
+@media (prefers-reduced-motion: reduce) {
+  .dog, .dogwrap, .posepop, .flip { animation: none !important; }
+}
+
+.bubble {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 14px 14px 4px 14px;
+  padding: 4px 10px;
+  font-family: "Gaegu", cursive;
+  font-size: 17px;
+  font-weight: 700;
+  margin-right: 30px;
+  margin-bottom: -2px;
+  max-width: 220px; /* fits inside the 260px window; longer text wraps instead of clipping */
+  line-height: 1.1;
+  text-align: center;
+  overflow-wrap: anywhere;
+  animation: bubble .35s cubic-bezier(.3, 1.6, .5, 1);
+  transform-origin: bottom right;
+}
+@keyframes bubble { 0% { transform: scale(.6); opacity: 0 } 100% { transform: scale(1); opacity: 1 } }
+.petcard {
+  width: 300px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  padding: 10px;
+  margin-bottom: 6px;
+  box-shadow: 3px 4px 0 rgba(43, 42, 51, 0.15);
+}
+.petcard textarea {
+  display: block;
+  width: 100%;
+  min-height: 74px;
+  max-height: 380px; /* grows with your text, then scrolls */
+  overflow-y: auto;
+  border: none;
+  resize: none;
+  background: transparent;
+  font: 15px/1.4 "Inter", system-ui, sans-serif;
+  color: var(--ink);
+  outline: none;
+}
+.atts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; max-height: 132px; overflow-y: auto; }
+.att { position: relative; border: 2px solid var(--ink); border-radius: 10px; background: #fff; overflow: hidden; animation: bubble .3s cubic-bezier(.3, 1.6, .5, 1); }
+.att-image img { display: block; height: 58px; max-width: 120px; object-fit: cover; }
+.att-file { display: flex; align-items: center; gap: 6px; padding: 6px 22px 6px 6px; max-width: 200px; }
+.fileglyph { flex: none; font: 700 9px/1 "Inter", sans-serif; background: #fde3c4; border-radius: 6px; padding: 8px 5px; letter-spacing: .02em; }
+.att-file .filename { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.attx { position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; border-radius: 50%; border: 0; background: var(--ink); color: var(--paper); font-size: 12px; line-height: 18px; padding: 0; cursor: pointer; }
+.petrow { display: flex; gap: 12px; align-items: center; font-size: 12px; }
+.petrow .hint { margin-left: auto; }
+.petrow .link { background: none; border: none; padding: 0; color: var(--ink); text-decoration: underline; cursor: pointer; font: inherit; }
+.hint { opacity: 0.55; }
+
+/* every pose stands on the same floor, at the same scale */
+.dogstage { display: flex; align-items: flex-end; justify-content: center; }
+
+/* a remark you can tap */
+.bubble.talk { cursor: default; font-family: "Gaegu", cursive; color: var(--ink); white-space: normal; }
+.bubble.talk.act { cursor: pointer; }
+.bubble.talk.act:hover { background: #fff; box-shadow: 2px 2px 0 var(--ink); }
+.bubble-go { font-family: "Inter", sans-serif; font-size: 12px; opacity: .6; }
+
+/* things dragged onto the dog */
+.pet.over .dogwrap { animation: eager .45s ease-in-out infinite; }
+@keyframes eager { 0%, 100% { transform: scale(1.12) rotate(0) } 25% { transform: scale(1.15) rotate(-3deg) } 75% { transform: scale(1.15) rotate(3deg) } }
+.fidget-chomp { animation: chomp .45s ease-in-out; }
+@keyframes chomp { 0%, 100% { transform: scale(1) } 25% { transform: scale(1.1, .88) } 50% { transform: scale(.96, 1.05) } 75% { transform: scale(1.08, .9) } }
+@media (prefers-reduced-motion: reduce) { .pet.over .dogwrap { animation: none; } }
+
+/* with the card open, a dragged-over dog just perks up: no wiggle */
+.pet.open.over .dogwrap { animation: none; transform: scale(1.05); }

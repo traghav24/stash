@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Save to Stash",
+  "version": "0.1.0",
+  "description": "Right-click any image, selection, link or page to drop it into Stash on your Mac.",
+  "permissions": [
+    "contextMenus",
+    "notifications"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:47123/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "save-page": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "Save this page to Stash"
+    }
+  },
+  "icons": {
+    "128": "icon.png"
+  }
+}

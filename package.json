@@ -1,0 +1,27 @@
+{
+  "name": "stash",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A self-organizing commonplace book with a floating dog.",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "concurrently -k \"vite --port 5173 --strictPort\" \"wait-on tcp:5173 && cross-env STASH_DEV=1 electron .\"",
+    "web": "vite --port 5173",
+    "build": "vite build",
+    "start": "vite build && electron ."
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "chrono-node": "^2.10.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.3.0",
+    "concurrently": "^10.0.7",
+    "cross-env": "^10.1.0",
+    "electron": "^45.3.2",
+    "vite": "^8.3.8",
+    "wait-on": "^9.5.1"
+  }
+}
