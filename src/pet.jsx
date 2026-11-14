@@ -3,8 +3,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { api } from "./api.js";
 import Dog from "./Dog.jsx";
 import { useStash, useNow, captureFromDataTransfer, attachmentsFromDataTransfer, filesToAttachments, saveAttachment } from "./useStash.js";
-import { adjustedEstimate, fmtDuration, hasTime, isOpenTask, minutesLeftToday, petPose } from "./time.js";
-import { pickQuip, appLine, touchLine, dragLine, fedLine, leaveLine, hoverLine } from "./quips.js";
+import { adjustedEstimate, fmtDuration, hasTime, isOpenTask, minutesLeftToday, dogPhase } from "./time.js";
+import { pickQuip, bedtimeLine, appLine, touchLine, dragLine, fedLine, leaveLine, hoverLine } from "./quips.js";
 import "./pet.css";
 
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -14,7 +14,6 @@ const reducedMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce
 // Little things an awake dog does when nobody's looking.
 const FIDGETS = ["hop", "tilt", "look", "wiggle", "stretch", "sniff"];
 const IDLE_FACES = ["peek-tongue", "peek-smile", "peek-happy", "peek-tongue-wide", "sit-confused", "thinking", "glowing"];
-const ASLEEP = new Set(["sleepy", "peek-sleepy", "half-asleep"]);
 
 // What's being dragged in, from what the drag tells us before the drop.
 function dragKind(dt) {
@@ -182,8 +181,7 @@ function Pet() {
     .map((i) => ({ i, mins: (new Date(i.due) - now) / 60000 }))
     .filter((x) => x.mins > 0 && x.mins <= 60)
     .sort((a, b) => a.mins - b.mins)[0];
-  const timeOfDay = petPose(settings, now);
-  const asleep = ASLEEP.has(timeOfDay);
+  const { pose: timeOfDay, asleep } = dogPhase(now);
 
   // Priority: carried > walking > something dragged over > reaction > typing > working > heads-up > being petted > hover > passing face > time of day
   const pose = carried
@@ -276,6 +274,16 @@ function Pet() {
       const talks = st.settings.petTalks !== false && !reducedMotion();
       if (!talks) return schedule(60000);
       if (st.open || st.hover || st.over || st.walk || st.say) return schedule(rand(15000, 30000)); // busy, try again soon
+      // 1am bedtime nudge wins over everything else, asleep or not.
+      const bedKey = "stash-bedtime-last";
+      let bedLast = 0;
+      try { bedLast = Number(localStorage.getItem(bedKey)) || 0; } catch {}
+      const bed = bedtimeLine(new Date(), bedLast);
+      if (bed) {
+        try { localStorage.setItem(bedKey, String(Date.now())); } catch {}
+        show(bed);
+        return schedule(rand(60000, 120000));
+      }
       const peekOn = st.settings.petPeeks !== false && !st.asleep;
       if (peekOn && Date.now() - lastPeek > peekGap) {
         lastPeek = Date.now();
