@@ -6,12 +6,22 @@ Feed anything to the dog. It files what you save, plans what you have to do, and
 - **Plans**: what you have to do, shown as time you can see (how much of the day is left, whether today fits, a "What now?" button).
 - **The dog**: sits on top of every window. Drag things onto it, click it to type, press ⌥ Tab to dump whatever you just copied.
 
-## Run it
+## Download (Mac)
+
+Get the latest installer from [Releases](https://github.com/traghav24/stash/releases/latest):
+
+- **Apple silicon** (M1 and later): `Stash-…-arm64.dmg`
+- **Intel**: `Stash-…-x64.dmg`
+
+Open the file and drag Stash into Applications. The app isn't signed with an Apple developer account, so the first time, macOS will refuse to open it: go to **System Settings → Privacy & Security**, scroll down and click **Open Anyway**. After that it opens normally.
+
+## Run it from source
 
 ```bash
 npm install
 npm run dev     # live-reloading app
 npm start       # build once and run
+npm run dist    # package the Mac installers into release/
 ```
 
 `npm run web` opens just the UI in a browser tab (data in localStorage), which is handy for design tweaks.
