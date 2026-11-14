@@ -8,7 +8,8 @@
     "dev": "concurrently -k \"vite --port 5173 --strictPort\" \"wait-on tcp:5173 && cross-env STASH_DEV=1 electron .\"",
     "web": "vite --port 5173",
     "build": "vite build",
-    "start": "vite build && electron ."
+    "start": "vite build && electron .",
+    "dist": "vite build && electron-builder --mac --arm64 --x64"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
@@ -21,7 +22,39 @@
     "concurrently": "^10.0.7",
     "cross-env": "^10.1.0",
     "electron": "^45.3.2",
+    "electron-builder": "^26.18.0",
     "vite": "^8.3.8",
     "wait-on": "^9.5.1"
+  },
+  "productName": "Stash",
+  "author": "Tanisha Raghav",
+  "build": {
+    "appId": "in.tanisharaghav.stash",
+    "productName": "Stash",
+    "files": [
+      "electron/**/*",
+      "dist/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png",
+      "target": [
+        "dmg"
+      ],
+      "identity": "-",
+      "extendInfo": {
+        "NSScreenCaptureUsageDescription": "Stash can look at your screen so the dog can comment on what you are doing. This is optional."
+      },
+      "hardenedRuntime": false
+    },
+    "dmg": {
+      "title": "Stash"
+    },
+    "artifactName": "Stash-${version}-${arch}.${ext}"
   }
 }
