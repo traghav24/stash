@@ -1,6 +1,6 @@
 // Things the dog says on its own. Novelty is the point: lots of lines, picked by what's
 // going on (time, plans, saves, the app you're in), never the same line twice in a row.
-import { adjustedEstimate, daysBetween, fmtDuration, hasTime, isOpenTask, minutesLeftToday, pickNext, relativeDay, relativeTime, todayTasks } from "./time.js";
+import { adjustedEstimate, daysBetween, fmtDuration, hasTime, isOpenTask, minutesLeftToday, dogPhase, pickNext, relativeDay, relativeTime, todayTasks } from "./time.js";
 
 const pick = (list) => list[Math.floor(Math.random() * list.length)];
 const short = (s, n = 28) => {
@@ -9,17 +9,37 @@ const short = (s, n = 28) => {
 };
 
 // ---- time of day ----------------------------------------------------------
-function timeLines(now, settings) {
+// Matches the dog's own day (see dogPhase in time.js).
+function timeLines(now) {
+  const { phase } = dogPhase(now);
+  return {
+    waking: ["*big stretch* good morning", "still waking up… give me a sec", "early start? i'll get my tiny coffee", "rise and dump"],
+    morning: ["morning brain is the best brain. use it!", "i'm SO awake right now 🐾", "one thing at a time. i'll hold the rest", "big focus energy today", "have you had water? i had water"],
+    lunch: ["lunch o'clock? i'm thinking about lunch", "full tummy. nap is coming…", "halfway through the day already!"],
+    evening: ["i'm awake again! what did i miss?", "evening zoomies 🐕", "nap done. let's go", "second wind! pick the easiest win", "tiny walk? i'll come", "anything to dump before tonight?"],
+    drowsy: ["*yawn* it's getting late…", "my eyes are getting heavy", "it's getting late. start winding down?", "sleepy dog hours. wrap up soon?", "i'm getting cozy. you should too"],
+    night: ["zzz… you should be asleep too"],
+    nap: ["zzz… afternoon nap"],
+  }[phase];
+}
+
+// ---- bedtime ----------------------------------------------------------------
+// From 1am to 5am the dog tells you to sleep: once as soon as it hits 1am, then
+// again every ~30 minutes while you're still up. Returns null when it's not time.
+const BEDTIME = [
+  "i'm off to sleep now. you sleep too, ok? 🌙",
+  "zzz… why are you still up? go to bed",
+  "*one eye opens* sleep. now. please",
+  "your plans will still be here tomorrow. sleep 🌙",
+  "zzz… the dog is asleep. the human should be too",
+  "mm… it's so late… close the laptop…",
+];
+export function bedtimeLine(now = new Date(), lastAt = 0) {
   const h = now.getHours();
-  const start = settings.dayStart ?? 10;
-  const end = settings.dayEnd ?? 19;
-  if (h < 5) return ["it's very late. the dog is judging (lovingly)", "night owl mode. i'm a night dog now", "zzz… oh hi. still up?", "the moon says go to bed. i agree with the moon"];
-  if (h < start) return ["good morning! i stretched already", "early start? i'll get my tiny coffee", "morning. small first step, then big ones", "rise and dump"];
-  if (h < 12) return ["morning brain is the best brain. use it!", "one thing at a time. i'll hold the rest", "big focus energy today 🐾", "have you had water? i had water"];
-  if (h < 14) return ["lunch o'clock? i'm thinking about lunch", "snack break? i won't tell", "halfway through the day already!"];
-  if (h < end - 1) return ["afternoon slump? stretch with me", "tiny walk? i'll come", "drink water, i'll guard the desktop", "the afternoon is long. we're doing great", "brb chasing a cursor"];
-  if (h < end + 1) return ["almost done for the day. one small thing?", "wrap up soon? future you will be grateful", "end of day energy: pick the easiest win"];
-  return ["day's done. you're allowed to stop", "evening! anything to dump before bed?", "rest counts as progress", "cozy hours. i'm on the blanket"];
+  if (h < 1 || h >= 5) return null;
+  const tonight1am = new Date(now).setHours(1, 0, 0, 0);
+  const due = lastAt < tonight1am || now - lastAt >= 30 * 60000;
+  return due ? { text: now - tonight1am < 30 * 60000 ? BEDTIME[0] : pick(BEDTIME.slice(1)), pose: now - tonight1am < 30 * 60000 ? "half-asleep" : "peek-sleepy" } : null;
 }
 
 // ---- just for fun -----------------------------------------------------------
@@ -136,11 +156,14 @@ export function appLine(app) {
 
 // Pick something to say. `recent` holds the last lines said, so nothing repeats too soon.
 export function pickQuip({ items, settings, now = new Date(), asleep, recent = [] }) {
-  if (asleep) return { text: pick(["zzz… dreaming about your plans", "zzz… *snore*", "mm… five more minutes"]) };
+  if (asleep) {
+    const nap = dogPhase(now).phase === "nap";
+    return { text: pick(nap ? ["zzz… afternoon nap", "zzz… wake me at 4:30", "mm… five more minutes", "zzz… dreaming about your plans"] : ["zzz… *snore*", "zzz… you should be asleep too", "mm… it's so late… bed…", "zzz… dreaming about tomorrow"]) };
+  }
   const pool = [
     ...planLines(items, settings, now),
     ...resurface(items, now),
-    ...timeLines(now, settings).map((text) => ({ text, weight: 1 })),
+    ...timeLines(now).map((text) => ({ text, weight: 1 })),
     ...FUN.map((text) => ({ text, weight: 0.4 })),
   ].filter((q) => !recent.includes(q.text));
   if (!pool.length) return { text: pick(FUN) };

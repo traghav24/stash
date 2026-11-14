@@ -115,12 +115,20 @@ export function pickNext(items, settings, now = new Date()) {
 }
 
 export function petPose(settings, now = new Date()) {
+  return dogPhase(now).pose;
+}
+
+// The dog's day, on the clock: busy morning, afternoon nap, lively evening,
+// drowsy from 11pm, fast asleep from 1am until it wakes at 7.
+// `asleep` means curled up with zz: it murmurs instead of chatting.
+export function dogPhase(now = new Date()) {
   const h = now.getHours() + now.getMinutes() / 60;
-  const start = settings.dayStart ?? 10;
-  const end = settings.dayEnd ?? 19;
-  if (h < start - 3 || h >= end + 2) return "sleepy"; // night: curled up, zz
-  if (h < start) return "peek-sleepy"; // waking up
-  if (h < Math.max(start + 2.5, 12.5)) return "peek-alert"; // alert morning
-  if (h < end - 1) return "lying"; // settled afternoon
-  return "half-asleep"; // winding down
+  if (h < 1) return { phase: "drowsy", pose: "half-asleep", asleep: false }; // midnight to 1am
+  if (h < 7) return { phase: "night", pose: "sleepy", asleep: true };
+  if (h < 8) return { phase: "waking", pose: "peek-sleepy", asleep: false };
+  if (h < 13) return { phase: "morning", pose: "peek-alert", asleep: false };
+  if (h < 14) return { phase: "lunch", pose: "lying", asleep: false };
+  if (h < 16.5) return { phase: "nap", pose: "sleepy", asleep: true };
+  if (h < 23) return { phase: "evening", pose: "peek-happy", asleep: false };
+  return { phase: "drowsy", pose: "half-asleep", asleep: false }; // 11pm to 1am
 }

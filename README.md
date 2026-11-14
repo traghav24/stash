@@ -64,7 +64,7 @@ Archiving hides an item. Nothing is deleted.
 - A **fit check**: "this is ~5h, you have ~3h".
 - **Task blocks sized by length**: a 2h task looks four times as big as a 30 min one.
 - **Estimates that learn**: Stash times your tasks and adjusts future guesses per pile.
-- **The dog follows the day**: alert in the morning, lying down in the afternoon, napping near the end of your day.
+- **The dog follows the day**: lively in the morning, naps after lunch (2–4:30pm), active again in the evening, drowsy from 11pm, and at 1am it heads to bed and tells you to sleep too, nudging again every half hour until 5am if you're still up.
 - **A running timer** in the dog's speech bubble ("40 min in"), and a heads-up an hour before anything with a set time.
 - **Relative times everywhere**: "tomorrow", "this weekend", "in 2 weeks".
 - **Nothing is ever overdue**: missed tasks show as "still on your plate", and after a week Stash asks whether you still want them.
