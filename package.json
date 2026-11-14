@@ -1,6 +1,6 @@
 {
   "name": "stash",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Feed anything to the dog. It files what you save, plans what you have to do, and times you while you do it.",
   "main": "electron/main.cjs",
